@@ -1,0 +1,62 @@
+<html>
+
+<head>
+<title>Title</title>
+</head>
+
+<body>
+
+<p>This is an R HTML document. When you click the <b>Knit HTML</b> button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+
+<!--begin.rcode
+# Preprocess the data
+library(caret)
+library(randomForest)
+library(dplyr)
+library(tidyr)
+
+train <- read.csv('pml-training.csv')
+test <- read.csv('pml-testing.csv')
+train_data = data.frame(train)
+test_data = data.frame(test)
+# Handle missing values if needed (e.g., imputation)
+# For simplicity, we'll omit rows with NA values
+train_data <- na.omit(train_data)
+# Convert 'classe' to a factor
+train_data$classe <- as.factor(train_data$classe)
+# Split the data into training and validation sets
+set.seed(1234)
+trainIndex <- createDataPartition(train_data$classe, p = .8, 
+                                  list = FALSE, 
+                                  times = 1)
+train_set <- train_data[ trainIndex,]
+validation_set <- train_data[-trainIndex,]
+# check factor levels
+print(table(train_data$classe))
+
+# Train a Random Forest model
+set.seed(1234)
+rf_model <- randomForest(classe ~ ., data = train_set)
+
+# Evaluate the model
+validation_predictions <- predict(rf_model, validation_set)
+confusionMatrix(validation_predictions, validation_set$classe)
+
+# Load and prepare test data
+test_cases <- read.csv('pml-training.csv')
+test_cases <- test_cases[, colnames(test_cases) %in% colnames(train_set)]  # Ensure consistency
+test_cases$classe <- factor(test_cases$classe, levels = levels(train_data$classe))
+
+# Make predictions on test cases
+test_predictions <- predict(rf_model, test_cases)
+print(test_predictions)
+end.rcode-->
+
+<p>You can also embed plots, for example:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+#plot(cars)
+end.rcode-->
+
+</body>
+</html>
